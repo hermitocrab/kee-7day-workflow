@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7-Day AI Teacher Agent Workflow</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --text: #e8e4dd;
+    --muted: #8b8b8b;
+    --accent: #f0a030;
+    --accent2: #4da6ff;
+    --border: #2a2a2a;
+    --green: #4caf88;
+    --code-bg: #111;
+    --badge: #252525;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: linear-gradient(180deg, #1a1a1a 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+  .hero .sub { font-size: 1.1rem; color: var(--muted); }
+  .hero .tag {
+    margin-top: 20px;
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero .tag span {
+    background: var(--badge);
+    border: 1px solid var(--border);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px 100px; }
+  
+  /* Guide Section */
+  .guide {
+    margin: 48px 0;
+    padding: 36px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .guide h2 { font-size: 1.3rem; margin-bottom: 20px; color: var(--accent2); }
+  .guide h3 { font-size: 1rem; margin: 20px 0 10px; color: var(--text); }
+  .guide p, .guide li { color: var(--muted); font-size: 0.9rem; margin-bottom: 8px; }
+  .guide ul { padding-left: 20px; margin-bottom: 16px; }
+  .guide code {
+    background: var(--code-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-family: 'SF Mono', 'Menlo', monospace;
+  }
+  .guide pre {
+    background: var(--code-bg);
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin: 12px 0;
+    border: 1px solid var(--border);
+    font-family: 'SF Mono', 'Menlo', monospace;
+    color: var(--muted);
+  }
+  
+  /* Day Cards */
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 40px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .day-card .day-num {
+    position: absolute;
+    top: -16px;
+    left: 24px;
+    background: var(--accent);
+    color: #000;
+    padding: 5px 16px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+  .day-card h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+  .day-card .purpose { color: var(--accent2); font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+  .day-card .io {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+    padding: 12px 16px;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .day-card .io div { flex: 1; min-width: 140px; }
+  .day-card .io strong { display: block; font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .day-card .io span { font-size: 0.88rem; color: var(--muted); }
+  .day-card .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin: 16px 0;
+  }
+  .day-card .flow .step {
+    background: var(--badge);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .day-card .flow .arr { color: var(--accent); font-weight: 700; }
+  .day-card .output-doc {
+    font-size: 0.82rem;
+    color: var(--green);
+    margin: 10px 0 20px;
+    font-weight: 600;
+  }
+  
+  /* Prompt block */
+  .prompt-block {
+    position: relative;
+    margin-top: 8px;
+  }
+  .prompt-block pre {
+    background: var(--code-bg);
+    color: #c8c8c8;
+    padding: 24px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    border: 1px solid var(--border);
+    font-family: 'SF Mono', 'Menlo', monospace;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .copy-btn.copied { background: var(--green); }
+  
+  /* Agent setup section */
+  .agent-setup {
+    margin: 48px 0;
+    padding: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .agent-setup h2 { font-size: 1.3rem; margin-bottom: 24px; color: var(--accent); }
+  .agent-setup ol { padding-left: 20px; color: var(--muted); font-size: 0.9rem; }
+  .agent-setup ol li { margin-bottom: 14px; }
+  
+  .table-wrap { overflow-x: auto; margin: 24px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border); color: var(--accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+  
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  
+  @media (max-width: 640px) {
+    .hero { padding: 48px 16px 36px; }
+    .hero h1 { font-size: 1.6rem; }
+    .day-card { padding: 28px 18px; }
+    .day-card h2 { font-size: 1.2rem; }
+    .day-card pre { font-size: 0.75rem; padding: 16px; max-height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>7-Day AI Teacher Agent Workflow</h1>
+  <p class="sub">七个独立 Agent · 从诊断到路径规划 · 一键部署到 OpenClaw</p>
+  <div class="tag">
+    <span>聚焦考试提分场景</span>
+    <span>诊断 → 训练 → 路径规划</span>
+    <span>每天一个独立 Agent</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- GUIDE -->
+<div class="guide">
+  <h2>📖 使用说明</h2>
+  
+  <h3>每个 Agent 做什么</h3>
+  <p>每天对应一个独立 Agent，不用全跑——用哪个部署哪个。输入学生数据，输出结构化文档。</p>
+
+  <h3>如何在 OpenClaw 创建 Agent</h3>
+  <p>复制任意一天的 Prompt → 打开 OpenClaw → 创建新 Agent → 粘贴为 System Prompt。以下任一方式：</p>
+  <ul>
+    <li><strong>方式 A — CLI：</strong><br>
+    <code>openclaw agent create day1-decoder --name "Day1 试卷五维解码"</code><br>
+    然后把下面 Day 1 的 prompt 粘贴到 System Prompt 字段</li>
+    <li><strong>方式 B — Gateway UI：</strong><br>
+    打开 <code>localhost:18777</code> → Agents → New Agent → 粘贴 System Prompt</li>
+    <li><strong>方式 C — Config 文件：</strong><br>
+    在 <code>~/.openclaw/agents/day1-decoder.json</code> 中定义，重启 Gateway</li>
+  </ul>
+
+  <h3>工作流建议</h3>
+  <p>Day 1→2→3 是诊断阶段（串行），Day 4→5→6 是执行阶段（可并行），Day 7 汇总所有输出生成路径卡。</p>
+  <p>每个 Agent 输出文档可保存为 Markdown，传给下一个 Agent 作为上下文。</p>
+</div>
+
+<!-- DAY 1 -->
+<div class="day-card">
+  <div class="day-num">DAY 1</div>
+  <h2>试卷五维解码</h2>
+  <p class="purpose">看清一张卷子到底考什么</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>试卷内容（文本粘贴或 OCR 后文本）</span></div>
+    <div><strong>📤 输出</strong><span>《试卷五维解码表》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">试卷导入</span><span class="arr">→</span><span class="step">题目拆解</span><span class="arr">→</span><span class="step">考点标注</span><span class="arr">→</span><span class="step">五维归类</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p1')">📋 复制 Prompt</button>
+    <pre id="p1">You are an expert English assessment analyst. Analyze this test paper across 5 dimensions:
+
+1. KNOWLEDGE POINTS — list every grammar/vocab point tested, with question numbers
+2. COGNITIVE LEVEL — classify each question: recall / comprehension / application / analysis
+3. QUESTION TYPE — categorize: multiple choice / gap-fill / matching / T/F/NG / short answer / essay
+4. DIFFICULTY — rate each question: easy / medium / hard, with brief justification
+5. SCORE DISTRIBUTION — map points to skill areas: listening / reading / writing / grammar / vocabulary / speaking
+
+For each dimension, note:
+- Which areas are over-weighted (disproportionate to real exam)
+- Which areas are missing (exam skills not tested here)
+- What this means for teaching priority
+
+Output as a structured table — 《试卷五维解码表》with 5 sections, one per dimension. Include a summary box at the top with: total questions, total points, skill coverage %, and the single most important insight.
+
+Input the test paper: [PASTE TEST CONTENT]</pre>
+  </div>
+</div>
+
+<!-- DAY 2 -->
+<div class="day-card">
+  <div class="day-num">DAY 2</div>
+  <h2>班级学情筛查</h2>
+  <p class="purpose">看清班级共性漏洞</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>学生得分数据（Excel/CSV 或文本表格）</span></div>
+    <div><strong>📤 输出</strong><span>《班级漏洞筛子图》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">小题得分</span><span class="arr">→</span><span class="step">维度统计</span><span class="arr">→</span><span class="step">筛子图定位</span><span class="arr">→</span><span class="step">问题排序</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p2')">📋 复制 Prompt</button>
+    <pre id="p2">You are a data-driven English teaching analyst. I will give you student scores broken down by question (小题得分). 
+
+Analyze the data to produce a Class Weakness Screen (《班级漏洞筛子图》):
+
+1. DIMENSION STATISTICS — for each skill area (listening/reading/writing/grammar/vocab), calculate:
+   - Class average
+   - Lowest score
+   - Score spread (gap between top and bottom)
+
+2. SIEVE MAPPING (筛子图定位) — group errors into patterns:
+   - Universal weaknesses (80%+ students missed) — these are the big holes in the sieve
+   - Common pitfalls (50-80% missed) — moderate leaks
+   - Scattered errors (<50% missed, individual) — small drips
+
+3. PRIORITY RANKING — rank problems by:
+   - Impact: how many points lost
+   - Fixability: how quickly it can improve
+   - Sequence: which must be fixed before others
+
+4. VISUAL MAP — describe a heat map layout:
+   - 🔴 Red zones (urgent, class-wide)
+   - 🟡 Yellow zones (moderate, 50-70% affected)
+   - 🟢 Green zones (strong, most OK)
+
+Student score data: [PASTE SCORES]</pre>
+  </div>
+</div>
+
+<!-- DAY 3 -->
+<div class="day-card">
+  <div class="day-num">DAY 3</div>
+  <h2>学生错因归类</h2>
+  <p class="purpose">看清每个学生为什么错</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>学生错题（姓名 + 错题内容 + 学生答案 + 正确答案）</span></div>
+    <div><strong>📤 输出</strong><span>《学生错因画像表》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">错题导入</span><span class="arr">→</span><span class="step">AI诊断</span><span class="arr">→</span><span class="step">五维标签</span><span class="arr">→</span><span class="step">个体画像</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p3')">📋 复制 Prompt</button>
+    <pre id="p3">You are a diagnostic English teaching specialist. For each student's wrong answers, classify the error ROOT CAUSE — not just what they got wrong, but WHY.
+
+Apply 5 diagnostic tags to each error:
+
+1. KNOWLEDGE GAP — they never learned this (missing input)
+2. PROCESSING ERROR — they knew it but applied wrong (L1 interference, overgeneralization)
+3. ATTENTION SLIP — careless mistake under time pressure
+4. STRATEGY FAILURE — wrong approach to the question type
+5. AFFECTIVE BLOCK — anxiety/confidence issue (froze, second-guessed)
+
+For each student, build an INDIVIDUAL PORTRAIT (个体画像):
+- Dominant error type (pattern across their questions)
+- Trigger conditions (when do they break down?)
+- L1 traces (specific Chinese→English transfer issues visible in their errors)
+- Recommended intervention (what specific fix targets their specific pattern)
+
+Output as 《学生错因画像表》— one section per student.
+
+Student errors: [PASTE ERRORS WITH STUDENT NAME]</pre>
+  </div>
+</div>
+
+<!-- DAY 4 -->
+<div class="day-card">
+  <div class="day-num">DAY 4</div>
+  <h2>ABC分层任务</h2>
+  <p class="purpose">同一考点，不同路径</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>一个考点 + 学生分层数据（Day 3 的错因画像）</span></div>
+    <div><strong>📤 输出</strong><span>《ABC分层任务单》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">学情分层</span><span class="arr">→</span><span class="step">A/B/C任务设计</span><span class="arr">→</span><span class="step">难度路径生成</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p4')">📋 复制 Prompt</button>
+    <pre id="p4">You are a differentiated instruction designer for English teaching. Given one test point, create THREE tiered learning paths:
+
+TEST POINT: [e.g., Present Perfect vs Past Simple]
+
+TIER A — Foundation (students scoring below 60%)
+- Simplified explanation with Chinese (L1) support
+- Recognition exercises (identify the tense in context)
+- Fill-in-blank with word bank
+- Success criteria: can identify which tense with 80% accuracy
+
+TIER B — Application (students scoring 60-80%)
+- Context-based exercises (choose tense based on time markers)
+- Sentence transformation (past simple → present perfect)
+- Error correction with explanation
+- Success criteria: can use both tenses correctly in controlled practice
+
+TIER C — Extension (students scoring above 80%)
+- Open-ended production (write a paragraph switching between tenses naturally)
+- Metalinguistic explanation (teach back why each tense is used in each case)
+- Real-world application (correct a Chinese student's essay that misuses these tenses)
+- Success criteria: can self-correct and explain reasoning
+
+For each tier, include:
+- 3 scaffolded exercises with answer key
+- Common L1 (Chinese) interference warnings for this specific grammar point
+- Self-check checkpoint after each exercise set
+
+Output as 《ABC分层任务单》— one tier per section.</pre>
+  </div>
+</div>
+
+<!-- DAY 5 -->
+<div class="day-card">
+  <div class="day-num">DAY 5</div>
+  <h2>精准补偿训练</h2>
+  <p class="purpose">哪里不会，就练哪里</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>一个具体薄弱点 + 学生水平</span></div>
+    <div><strong>📤 输出</strong><span>《个人补偿训练包》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">薄弱点</span><span class="arr">→</span><span class="step">题型匹配</span><span class="arr">→</span><span class="step">变式训练</span><span class="arr">→</span><span class="step">答案解析</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p5')">📋 复制 Prompt</button>
+    <pre id="p5">You are a precision remedial English training designer. Build a targeted training packet for ONE specific weakness:
+
+1. DIAGNOSE — Name the weakness precisely. What exactly is the student getting wrong?
+
+2. QUESTION-TYPE MATCHING — Give 3 diagnostic questions that directly expose this weakness. Match the question format to the original exam format.
+
+3. VARIATION DRILLS — Design 10 practice items that target the SAME skill through DIFFERENT question types:
+   - Gap-fill → Multiple choice → Error correction → Sentence transformation → Free production
+   - Difficulty progression: easy (build confidence) → medium → hard (exam-level)
+
+4. ANSWER ANALYSIS — For each wrong answer option, provide:
+   - Why it's wrong (targeted explanation, not just "correct answer is B")
+   - What misconception leads to choosing it
+   - L1-specific trap warning (what Chinese speakers typically get wrong on this exact point)
+
+Output as 《个人补偿训练包》with all items and full answer key.
+
+Student's specific weakness: [DESCRIBE + EXAMPLE ERRORS]
+Student level: [CEFR LEVEL or BAND SCORE]</pre>
+  </div>
+</div>
+
+<!-- DAY 6 -->
+<div class="day-card">
+  <div class="day-num">DAY 6</div>
+  <h2>错题复现过关</h2>
+  <p class="purpose">讲过不等于会了</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>学生错题日志（题目 + 日期 + 错误类型）</span></div>
+    <div><strong>📤 输出</strong><span>《错题复现与二次过关表》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">错题本</span><span class="arr">→</span><span class="step">1/3/7复现</span><span class="arr">→</span><span class="step">二次检测</span><span class="arr">→</span><span class="step">过关标记</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p6')">📋 复制 Prompt</button>
+    <pre id="p6">You are a spaced repetition and mastery verification designer. Use the 1/3/7 Recurrence Protocol:
+
+- DAY 1 CHECK — 3 parallel questions testing the exact same point (verification that the correction was understood)
+- DAY 3 CHECK — 3 questions testing the same skill in a different format (tests transfer — can they recognize it in a new guise?)
+- DAY 7 CHECK — 2 questions hidden within a mixed-topic review set (tests long-term retention — is it really learned?)
+
+For each error from the error log, generate all 3 check sets.
+
+Scoring:
+- PASS: 2/3 correct (or 1/2 for Day 7 embedded check)
+- FAIL → generate a micro re-teach script (3-minute targeted fix for that specific misconception)
+- PASS → mark 过关 (GATE CLEARED), move to maintenance review queue
+
+Output as 《错题复现与二次过关表》with clear pass/fail columns and re-teach scripts for failed items.
+
+Error log: [PASTE STUDENT ERRORS WITH DATES]</pre>
+  </div>
+</div>
+
+<!-- DAY 7 -->
+<div class="day-card">
+  <div class="day-num">DAY 7</div>
+  <h2>个人提分路径</h2>
+  <p class="purpose">形成下一阶段训练路线</p>
+  <div class="io">
+    <div><strong>📥 输入</strong><span>所有前 6 天输出 + 学生目标 + 爱好</span></div>
+    <div><strong>📤 输出</strong><span>《学生个人提分路径卡》</span></div>
+  </div>
+  <div class="flow">
+    <span class="step">诊断结果</span><span class="arr">→</span><span class="step">训练记录</span><span class="arr">→</span><span class="step">AI推荐</span><span class="arr">→</span><span class="step">下一步计划</span>
+  </div>
+  <div class="prompt-block">
+    <button class="copy-btn" onclick="copyPrompt(this, 'p7')">📋 复制 Prompt</button>
+    <pre id="p7">You are an English learning path architect. Synthesize all diagnostic and training data into a personalized advancement route:
+
+1. CURRENT PROFILE — Summarize the student's state: strongest skill, weakest skill, dominant error type, points already gained from remediation
+
+2. HIGHEST-LEVERAGE MOVE — What single change would yield the biggest score jump in the shortest time? Base this on the gap analysis from previous days.
+
+3. 4-WEEK ROUTE:
+   - Phase 1 (Week 1-2): Fix the highest-impact weakness. Daily micro-habit + weekly checkpoint
+   - Phase 2 (Week 3-4): Strengthen the borderline skill closest to next band. Daily micro-habit + weekly checkpoint
+   
+4. TODAY'S ACTION — One concrete task the student can do right now. Must be specific and completable in under 30 minutes.
+
+5. AVOID LIST — What NOT to spend time on (lower priorities, distraction topics)
+
+6. MOTIVATION ANCHOR — Connect this plan to the student's personal goal or hobby
+
+7. SUCCESS GATE — How the student will know they're ready to advance (specific measurable checkpoint)
+
+Output as a one-page 《学生个人提分路径卡》:
+📊 Current Profile | 🎯 Next Target | 🗺️ 4-Week Route | ⚡ Today's Action | ⚠️ Avoid | 🏆 Success Gate
+
+REVIEW: Before finalizing, check — did the remediation from Days 4-6 actually change the student's weak points? If so, adjust the route accordingly. Do not recommend training for a weakness that was already resolved.
+
+Student diagnostic summary + training records: [PASTE DAYS 1-6 OUTPUTS]
+Student goal: [TARGET SCORE + TIMELINE]
+Student hobby: [FOR HOBBY-THREADING]</pre>
+  </div>
+</div>
+
+<!-- AGENT SETUP REFERENCE -->
+<div class="agent-setup">
+  <h2>⚡ OpenClaw Agent 部署参考</h2>
+  
+  <h3>推荐的 7-Agent 架构</h3>
+  <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;">每个 Agent 独立、无状态。输入→输出。管道模式：前面的输出变成后面的输入。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Agent Name</th><th>Day</th><th>输入源</th><th>输出文档</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>day1-decoder</td><td>试卷五维解码</td><td>试卷文本</td><td>试卷五维解码表</td></tr>
+        <tr><td>day2-screener</td><td>班级学情筛查</td><td>小题得分数据</td><td>班级漏洞筛子图</td></tr>
+        <tr><td>day3-classifier</td><td>学生错因归类</td><td>学生错题列表</td><td>学生错因画像表</td></tr>
+        <tr><td>day4-tiered</td><td>ABC分层任务</td><td>考点 + Day3 输出</td><td>ABC分层任务单</td></tr>
+        <tr><td>day5-remedial</td><td>精准补偿训练</td><td>薄弱点 + 学生水平</td><td>个人补偿训练包</td></tr>
+        <tr><td>day6-recurrence</td><td>错题复现过关</td><td>错题日志</td><td>错题复现与二次过关表</td></tr>
+        <tr><td>day7-router</td><td>个人提分路径</td><td>Day1-6 全部输出</td><td>学生个人提分路径卡</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>CLI 一键创建（复制粘贴到终端）</h3>
+  <pre style="color:var(--muted);">openclaw agent create day1-decoder --name "Day1 试卷五维解码"
+openclaw agent create day2-screener --name "Day2 班级学情筛查"
+openclaw agent create day3-classifier --name "Day3 学生错因归类"
+openclaw agent create day4-tiered --name "Day4 ABC分层任务"
+openclaw agent create day5-remedial --name "Day5 精准补偿训练"
+openclaw agent create day6-recurrence --name "Day6 错题复现过关"
+openclaw agent create day7-router --name "Day7 个人提分路径"</pre>
+
+  <p style="color:var(--muted);font-size:0.85rem;margin-top:16px;">创建后，在 Gateway UI (localhost:18777) 中为每个 Agent 粘贴对应 Day 的 System Prompt。每个 Agent 独立运行。</p>
+</div>
+
+<footer>Built for OpenClaw · Agent-per-Day Architecture</footer>
+
+</div>
+
+<script>
+function copyPrompt(btn, id) {
+  const pre = document.getElementById(id);
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 复制 Prompt';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
